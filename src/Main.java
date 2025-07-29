@@ -10,12 +10,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        HashMap<Integer, HashMap<String, Double>> sample;
-        HashMap<String, Double> sampleSample;
-
-
-
-        String fileLocation = "E:\\Users\\Joever\\Documents\\Personal\\FINANCE\\GASTOS - 2025.txt";
+        String fileLocation = "src/expenses.txt"; // Txt file
         String line;
         List<String> words;
         double[] totalPerMonth = new double[12];

@@ -3,8 +3,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
+
 /*
 This class is for the breakdown of what I've been spending each month
 What this app should do
@@ -34,7 +34,7 @@ What this app should do
 public class ExpensesBreakdown {
 
     public static void main(String[] args) {
-        String fileLocation = "E:\\Users\\Joever\\Documents\\Personal\\FINANCE\\GASTOS - 2025.txt"; // Txt file
+        String fileLocation = "src/expenses.txt"; // Txt file
         String[] months = {"JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
 
         displayTotal(months, mappingItemAndAmount(fileLocation, months));
@@ -125,6 +125,20 @@ public class ExpensesBreakdown {
         return words;
     }
 
+    public static int getMaxLength(HashMap<Integer, HashMap<String, Double>> monthBreakdown) {
+        // Find the longest item name for alignment for the whole year
+        int maxLength = 0;
+        for (HashMap<String, Double> month : monthBreakdown.values()) {
+            for (String key : month.keySet()) {
+                if (key.length() > maxLength) {
+                    maxLength = key.length();
+                }
+            }
+        }
+
+        return maxLength;
+    }
+
     /*
     Display the Total Breakdown for the Year
     What it does:
@@ -135,6 +149,9 @@ public class ExpensesBreakdown {
         - It joins all the things I've spent on and creates a sum of it
      */
     public static void yearTotalBreakdown(HashMap<Integer, HashMap<String, Double>> monthBreakdown) {
+        // Get the total expenses for the whole year
+        double totalForTheYear = monthBreakdown.values().stream().mapToDouble(entry -> entry.values().stream().mapToDouble(Double::doubleValue).sum()).sum();
+
         HashMap<String, Double> totalBreakdown = new HashMap<>();
 
         for (int i = 0; i < monthBreakdown.size(); i++) {
@@ -149,40 +166,45 @@ public class ExpensesBreakdown {
                     });
         }
 
-        // Print total breakdown
-        totalBreakdown.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .forEach(entry -> System.out.printf("\t₱%,.2f:\t %s\n", entry.getValue(), entry.getKey()));
+        // Print the year breakdown
+        totalBreakdown.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .forEach(entry -> System.out.printf("\t%-" + (getMaxLength(monthBreakdown) + 1) + "s: ₱%,.2f%n", entry.getKey(), entry.getValue()));
+
+        // Print the sum of all the breakdown
+        System.out.println("_______________________________________");
+        System.out.printf("\t%-" + (getMaxLength(monthBreakdown) + 1) + "s: ₱%,.2f", "TOTAL", totalForTheYear);
     }
 
     /*
     Display the whole calculations including the yearTotalBreakdown
      */
     public static void displayTotal(String[] months, HashMap<Integer, HashMap<String, Double>> monthBreakdown) {
-        System.out.println("===================");
-        System.out.println("EXPENSES 2025");
-        System.out.println("===================");
+        // Print the expenses
+        System.out.println("=======================================");
+        System.out.println("\t\tEXPENSES 2025");
+        System.out.println("=======================================");
 
-        // Total per month
+
+        // Print breakdown and total per month
         for (int i = 0; i < months.length; i++) {
-            System.out.println();
-            System.out.println(months[i] + " BREAKDOWN");
-            // System.out.printf("%s : ₱%,.2f\n", months[i], totalPerMonth[i]);
             // Breakdown per month
             if (monthBreakdown.get(i) != null) {
+                System.out.println(months[i] + "\n_______________________________________");
                 monthBreakdown.get(i).entrySet().stream().sorted(Map.Entry.comparingByKey())
-                        .forEach(entry -> System.out.printf("\t%s:\t\t₱%,.2f\n", entry.getKey(), entry.getValue()));
-                System.out.printf("\nTOTAL = ₱%,.2f\n", monthBreakdown.get(i).values().stream().mapToDouble(Double::doubleValue).sum());
+                        .forEach(entry -> System.out.printf("\t%-" + (getMaxLength(monthBreakdown) + 1) + "s: ₱%,.2f%n", entry.getKey(), entry.getValue()));
+                System.out.println("_______________________________________");
+                System.out.printf("\t%-" + (getMaxLength(monthBreakdown) + 1) + "s: ₱%,.2f%n%n",
+                        "TOTAL", monthBreakdown.get(i).values().stream().mapToDouble(Double::doubleValue).sum());
+
+                System.out.println("---------------------------------------");
+                System.out.println("---------------------------------------\n");
             }
-
-            System.out.println("-------------------");
-            System.out.println("-------------------");
-            System.out.println("-------------------");
         }
-        AtomicInteger index = new AtomicInteger(0);
 
-        System.out.println("2025 Expenses Breakdown");
-        double totalForTheYear = monthBreakdown.values().stream().mapToDouble(entry -> entry.values().stream().mapToDouble(Double::doubleValue).sum()).sum();
-        System.out.printf("\n\nTOTAL : ₱%,.2f\n", totalForTheYear);
+        System.out.println("\n\n_____________________________________");
+        System.out.println("\t\t2025 TOTAL Breakdown");
+        System.out.println("_____________________________________");
         yearTotalBreakdown(monthBreakdown);
     }
 }
